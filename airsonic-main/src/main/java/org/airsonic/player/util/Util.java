@@ -4,7 +4,7 @@
  Airsonic is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+ (at any later version.
 
  Airsonic is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -51,6 +51,7 @@ public final class Util {
 
     private static final Logger LOG = LoggerFactory.getLogger(Util.class);
     private static final String URL_SENSITIVE_REPLACEMENT_STRING = "<hidden>";
+    private static final String AZURE_MOUNT_PATH = System.getenv().getOrDefault("AZURE_MOUNT_PATH", "/mnt/azure");
 
     /**
      * Disallow external instantiation.
@@ -59,17 +60,17 @@ public final class Util {
     }
 
     public static String getDefaultMusicFolder() {
-        String def = isWindows() ? "c:\\music" : "/var/music";
+        String def = isWindows() ? AZURE_MOUNT_PATH + "\\music" : AZURE_MOUNT_PATH + "/music";
         return System.getProperty("airsonic.defaultMusicFolder", def);
     }
 
     public static String getDefaultPodcastFolder() {
-        String def = isWindows() ? "c:\\podcast" : "/var/podcast";
+        String def = isWindows() ? AZURE_MOUNT_PATH + "\\podcast" : AZURE_MOUNT_PATH + "/podcast";
         return System.getProperty("airsonic.defaultPodcastFolder", def);
     }
 
     public static String getDefaultPlaylistFolder() {
-        String def = isWindows() ? "c:\\playlists" : "/var/playlists";
+        String def = isWindows() ? AZURE_MOUNT_PATH + "\\playlists" : AZURE_MOUNT_PATH + "/playlists";
         return System.getProperty("airsonic.defaultPlaylistFolder", def);
     }
 

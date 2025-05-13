@@ -67,8 +67,9 @@ import java.util.stream.Stream;
 public class SettingsService {
 
     // Airsonic home directory.
-    private static final Path AIRSONIC_HOME_WINDOWS = Paths.get("c:/airsonic");
-    private static final Path AIRSONIC_HOME_OTHER = Paths.get("/var/airsonic");
+    private static final String AZURE_MOUNT_PATH = System.getenv().getOrDefault("AZURE_MOUNT_PATH", "/mnt/azure");
+    private static final Path AIRSONIC_HOME_WINDOWS = Paths.get(AZURE_MOUNT_PATH + "/airsonic");
+    private static final Path AIRSONIC_HOME_OTHER = Paths.get(AZURE_MOUNT_PATH + "/airsonic");
 
     // Global settings.
     private static final String KEY_INDEX_STRING = "IndexString";
@@ -466,7 +467,7 @@ public class SettingsService {
     }
 
     public static String getDefaultJDBCUrl() {
-        return "jdbc:hsqldb:file:" + getAirsonicHome().resolve("db").resolve(getFileSystemAppName()).toString() + ";hsqldb.tx=mvcc;sql.enforce_size=false;sql.char_literal=false;sql.nulls_first=false;sql.pad_space=false;hsqldb.defrag_limit=50;shutdown=true";
+        return "jdbc:hsqldb:file:" + Paths.get(AZURE_MOUNT_PATH).resolve("db").resolve(getFileSystemAppName()).toString() + ";hsqldb.tx=mvcc;sql.enforce_size=false;sql.char_literal=false;sql.nulls_first=false;sql.pad_space=false;hsqldb.defrag_limit=50;shutdown=true";
     }
 
     public static String getDefaultJDBCUsername() {
@@ -482,7 +483,7 @@ public class SettingsService {
     }
 
     public static String getDefaultLogFile() {
-        return SettingsService.getAirsonicHome().resolve(getFileSystemAppName() + ".log").toString();
+        return Paths.get(AZURE_MOUNT_PATH).resolve(getFileSystemAppName() + ".log").toString();
     }
 
     public String getLogFile() {

@@ -155,3 +155,8 @@ local.properties
 
 # Code Recommenders
 .recommenders/
+
+# Project specific
+# Ignore contents of install/docker/airsonic folder but track the folder itself
+install/docker/airsonic/*
+!install/docker/airsonic/.gitkeep
