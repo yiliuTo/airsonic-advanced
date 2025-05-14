@@ -19,11 +19,32 @@
  */
 package org.airsonic.player.controller;
 
-import org.airsonic.player.domain.*;
-import org.airsonic.player.service.*;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.airsonic.player.domain.InternetRadio;
+import org.airsonic.player.domain.MediaLibraryStatistics;
+import org.airsonic.player.domain.MusicFolder;
+import org.airsonic.player.domain.MusicFolderContent;
+import org.airsonic.player.domain.UserSettings;
+import org.airsonic.player.service.MediaFolderService;
+import org.airsonic.player.service.MediaScannerService;
+import org.airsonic.player.service.MusicIndexService;
+import org.airsonic.player.service.PlayerService;
+import org.airsonic.player.service.SecurityService;
+import org.airsonic.player.service.SettingsService;
 import org.airsonic.player.service.search.IndexManager;
 import org.airsonic.player.util.FileUtil;
 import org.airsonic.player.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.ServletRequestUtils;
@@ -31,13 +52,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.RequestContextUtils;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import java.nio.file.Path;
-import java.time.Instant;
-import java.util.*;
 
 /**
  * Controller for the left index frame.
@@ -47,6 +61,8 @@ import java.util.*;
 @Controller
 @RequestMapping("/left")
 public class LeftController {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LeftController.class);
 
     // Update this time if you want to force a refresh in clients.
     private static final Instant LAST_COMPATIBILITY_TIME = Instant.parse("2012-03-06T00:00:00.00Z");
@@ -131,12 +147,22 @@ public class LeftController {
 
         String username = securityService.getCurrentUsername(request);
         UserSettings userSettings = settingsService.getUserSettings(username);
+        LOG.info("User {} settings: {}", username, userSettings);
         List<MusicFolder> allMusicFolders = mediaFolderService.getMusicFoldersForUser(username);
+        LOG.info("User {} all music folders: {}", username, MusicFolder.toPathList(allMusicFolders));
+        LOG.info("User {} selected music folder: {}", username, userSettings.getSelectedMusicFolderId());
         List<MusicFolder> musicFoldersToUse = mediaFolderService.getMusicFoldersForUser(username, userSettings.getSelectedMusicFolderId());
+        LOG.info("User {} music folders to use: {}", username, MusicFolder.toPathList(musicFoldersToUse));
         MusicFolder selectedMusicFolder = musicFoldersToUse.stream()
                 .filter(f -> f.getId().equals(userSettings.getSelectedMusicFolderId()))
                 .findAny().orElse(null);
+        if (selectedMusicFolder != null) {
+            LOG.info("User {} selected music folder: {}, name {}", username, selectedMusicFolder.getPath(), selectedMusicFolder.getName());
+        }
         MusicFolderContent musicFolderContent = musicIndexService.getMusicFolderContent(musicFoldersToUse, refresh);
+        if (musicFolderContent != null) {
+            LOG.info("User {} music folder content: {}", username, musicFolderContent);
+        }
 
         map.put("player", playerService.getPlayer(request, response));
         map.put("scanning", mediaScannerService.isScanning());
