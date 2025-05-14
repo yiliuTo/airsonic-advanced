@@ -43,11 +43,19 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebsocketConfiguration implements WebSocketMessageBrokerConfigurer {
     public static final String UNDERLYING_SERVLET_REQUEST = "servletRequest";
+
+    private static final Logger logger = Logger.getLogger(WebsocketConfiguration.class.getName());
+    static {
+        java.util.logging.ConsoleHandler consoleHandler = new java.util.logging.ConsoleHandler();
+        logger.setUseParentHandlers(false);
+        logger.addHandler(consoleHandler);
+    }
 
     private TaskScheduler messageBrokerTaskScheduler;
     private String contextPath;
@@ -65,6 +73,7 @@ public class WebsocketConfiguration implements WebSocketMessageBrokerConfigurer 
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
+        logger.info("Configuring message broker with simple broker and application destination prefixes.");
         config.enableSimpleBroker("/topic", "/queue")
                 .setTaskScheduler(messageBrokerTaskScheduler)
                 .setHeartbeatValue(new long[] { 20000, 20000 });
@@ -77,6 +86,7 @@ public class WebsocketConfiguration implements WebSocketMessageBrokerConfigurer 
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
+        logger.info("Registering STOMP endpoints with SockJS support.");
         registry.addEndpoint("/websocket")
                 .setAllowedOriginPatterns("*")
                 .addInterceptors(new ServletRequestCaptureHandshakeInterceptor(contextPath))
